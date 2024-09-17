@@ -232,9 +232,9 @@ elif tab == "Expenses Tab":
 
     with exp_col1:
         st.session_state.inputs['mortgage_expense'] = st.number_input('Monthly Fixed Expenses (Mortgage) (RM)', min_value=0.0, format="%.2f", value=st.session_state.inputs['mortgage_expense'])
-        st.session_state.inputs['mortgage_years_left'] = st.number_input('Years Left to Serve Mortgage', min_value=0, format="%d", value=st.session_state.inputs['mortgage_years_left'])
+        st.session_state.inputs['mortgage_years_left'] = st.number_input('Years Left to Serve Mortgage - After Retired', min_value=0, format="%d", value=st.session_state.inputs['mortgage_years_left'])
         st.session_state.inputs['car_loan_expense'] = st.number_input('Monthly Fixed Expenses (Car Loan) (RM)', min_value=0.0, format="%.2f", value=st.session_state.inputs['car_loan_expense'])
-        st.session_state.inputs['car_loan_years_left'] = st.number_input('Years Left to Serve Car Loan', min_value=0, format="%d", value=st.session_state.inputs['car_loan_years_left'])
+        st.session_state.inputs['car_loan_years_left'] = st.number_input('Years Left to Serve Car Loan - After Retired', min_value=0, format="%d", value=st.session_state.inputs['car_loan_years_left'])
         st.session_state.inputs['other_fixed_payments'] = st.number_input('Other Fixed Payments (Takaful/Insurance) (RM)', min_value=0.0, format="%.2f", value=st.session_state.inputs['other_fixed_payments'])
 
     with exp_col2:
