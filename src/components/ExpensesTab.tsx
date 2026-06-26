@@ -71,7 +71,8 @@ export function ExpensesTab({
                           type="number"
                           inputMode="decimal"
                           className="field-input pl-10"
-                          value={item.monthly}
+                          value={item.monthly === 0 ? '' : item.monthly}
+                          placeholder="0"
                           step={50}
                           onChange={(e) => update(item.id, 'monthly', e.target.value === '' ? 0 : Number(e.target.value))}
                         />
@@ -86,7 +87,8 @@ export function ExpensesTab({
                             type="number"
                             inputMode="numeric"
                             className="field-input pr-12"
-                            value={item.yearsRemaining}
+                            value={item.yearsRemaining === 0 ? '' : item.yearsRemaining ?? ''}
+                            placeholder="0"
                             min={0}
                             onChange={(e) =>
                               update(item.id, 'yearsRemaining', e.target.value === '' ? 0 : Number(e.target.value))

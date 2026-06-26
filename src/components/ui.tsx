@@ -31,7 +31,10 @@ export function NumberField({
           type="number"
           inputMode="decimal"
           className={`field-input ${prefix ? 'pl-10' : ''} ${suffix ? 'pr-10' : ''}`}
-          value={Number.isFinite(value) ? value : ''}
+          // Show an empty box (with a "0" placeholder) for a zero value so a
+          // leading "0" doesn't stick in front of what the user types.
+          value={Number.isFinite(value) && value !== 0 ? value : ''}
+          placeholder="0"
           step={step}
           min={min}
           onChange={(e) => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
