@@ -42,6 +42,7 @@ export function ExpensesTab({
           <Section
             key={group}
             title={group}
+            hint="For each item, enter the monthly cost in RM. For loans or time-limited commitments, set the years remaining — the payment drops to RM 0 after that (shown as an 'ends YYYY' badge). 'Ongoing' items never expire."
             right={<span className="text-xs text-slate-400">{formatRM(groupMonthly)}/mo</span>}
           >
             <div className="space-y-2">

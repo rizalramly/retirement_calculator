@@ -2,7 +2,7 @@ import { generatePeriodicIncrements, type ProjectionResult } from '../engine';
 import type { SavingsInputs } from '../defaults';
 import { formatRM } from '../format';
 import { downloadCSV } from '../csv';
-import { MetricCard, NumberField, Section } from './ui';
+import { InfoTip, MetricCard, NumberField, Section } from './ui';
 
 const INTERVAL_OPTIONS = [
   { interval: 1, label: 'Every year' },
@@ -57,14 +57,23 @@ export function SavingsTab({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Section title="EPF — accumulation">
           <div className="grid grid-cols-2 gap-3">
-            <NumberField label="Current EPF balance" prefix="RM" value={savings.currentEpfBalance} onChange={(v) => set('currentEpfBalance', v)} step={1000} />
-            <NumberField label="Current age" value={savings.currentAge} onChange={(v) => set('currentAge', v)} />
-            <NumberField label="Retirement age" value={savings.retirementAge} onChange={(v) => set('retirementAge', v)} />
-            <NumberField label="Project to age" value={savings.projectionEndAge} onChange={(v) => set('projectionEndAge', v)} />
-            <NumberField label="Monthly EPF (incl. employer)" prefix="RM" value={savings.monthlyEpfContribution} onChange={(v) => set('monthlyEpfContribution', v)} step={100} />
-            <NumberField label="Bonus months" value={savings.bonusMonths} onChange={(v) => set('bonusMonths', v)} />
+            <NumberField label="Current EPF balance" prefix="RM" value={savings.currentEpfBalance} onChange={(v) => set('currentEpfBalance', v)} step={1000}
+              hint="Your total EPF savings today (Account 1 + Account 2), in RM. This is the starting balance for the projection." />
+            <NumberField label="Current age" value={savings.currentAge} onChange={(v) => set('currentAge', v)}
+              hint="Your age now. The projection starts from this age and the current calendar year." />
+            <NumberField label="Retirement age" value={savings.retirementAge} onChange={(v) => set('retirementAge', v)}
+              hint="Age you stop contributing. EPF contributions end here; withdrawals to cover expenses begin the following year." />
+            <NumberField label="Project to age" value={savings.projectionEndAge} onChange={(v) => set('projectionEndAge', v)}
+              hint="The final age the year-by-year projection runs to (e.g. 85)." />
+            <NumberField label="Monthly EPF (incl. employer)" prefix="RM" value={savings.monthlyEpfContribution} onChange={(v) => set('monthlyEpfContribution', v)} step={100}
+              hint="Total monthly EPF contribution including the employer's share (employee + employer). The first year counts only the months left after the current month." />
+            <NumberField label="Bonus months" value={savings.bonusMonths} onChange={(v) => set('bonusMonths', v)}
+              hint="How many months of contribution are paid as an annual bonus (e.g. 2 = two extra months of EPF added once a year)." />
             <label className="block">
-              <span className="field-label">Bonus paid in</span>
+              <span className="field-label flex items-center">
+                Bonus paid in
+                <InfoTip text="Calendar month the bonus is credited. In the first projection year it only counts if that month is still ahead of the current month." />
+              </span>
               <select
                 className="field-input"
                 value={savings.bonusMonth}
@@ -77,12 +86,14 @@ export function SavingsTab({
                 ))}
               </select>
             </label>
-            <NumberField label="Self-contribution / year" prefix="RM" value={savings.preRetirementSelfContributionPerYear} onChange={(v) => set('preRetirementSelfContributionPerYear', v)} step={500} />
-            <NumberField label="EPF dividend rate" suffix="%" value={savings.epfDividendRate} onChange={(v) => set('epfDividendRate', v)} step={0.1} />
+            <NumberField label="Self-contribution / year" prefix="RM" value={savings.preRetirementSelfContributionPerYear} onChange={(v) => set('preRetirementSelfContributionPerYear', v)} step={500}
+              hint="Extra voluntary EPF top-up you add each year while still working (i-Saraan / self top-up)." />
+            <NumberField label="EPF dividend rate" suffix="%" value={savings.epfDividendRate} onChange={(v) => set('epfDividendRate', v)} step={0.1}
+              hint="Assumed annual EPF dividend, in percent. Real EPF dividends vary every year and are not guaranteed." />
           </div>
         </Section>
 
-        <Section title="Salary increments">
+        <Section title="Salary increments" hint="Model future pay rises that increase your monthly EPF contribution. Pick a recurring frequency tied to your years-to-retirement, or 'Custom' for specific one-off increments.">
           {/* Mode selector: periodic intervals tied to the plan, or a custom list. */}
           <div className="mb-3 flex flex-wrap gap-1 rounded-xl bg-slate-200/70 p-1 dark:bg-slate-800/70">
             {INTERVAL_OPTIONS.map((opt) => {
@@ -121,6 +132,7 @@ export function SavingsTab({
                 value={savings.periodicPercent}
                 onChange={(v) => set('periodicPercent', v)}
                 step={0.5}
+                hint="Percentage your monthly EPF contribution rises at each step. It compounds (the same % is applied again at the next step)."
               />
               <PeriodicSummary savings={savings} startYear={startYear} />
             </div>
@@ -128,9 +140,12 @@ export function SavingsTab({
             <div className="space-y-3">
               {savings.salaryIncrements.map((inc, i) => (
                 <div key={i} className="grid grid-cols-3 gap-2">
-                  <NumberField label={`#${i + 1} percent`} suffix="%" value={inc.percent} onChange={(v) => setIncrement(i, 'percent', v)} />
-                  <NumberField label="Year" value={inc.year} onChange={(v) => setIncrement(i, 'year', v)} />
-                  <NumberField label="Month" value={inc.month} onChange={(v) => setIncrement(i, 'month', v)} min={1} />
+                  <NumberField label={`#${i + 1} percent`} suffix="%" value={inc.percent} onChange={(v) => setIncrement(i, 'percent', v)}
+                    hint="Size of this one-off pay rise, in percent, applied to your monthly EPF contribution." />
+                  <NumberField label="Year" value={inc.year} onChange={(v) => setIncrement(i, 'year', v)}
+                    hint="Calendar year this increment takes effect." />
+                  <NumberField label="Month" value={inc.month} onChange={(v) => setIncrement(i, 'month', v)} min={1}
+                    hint="Month (1–12) it starts. A mid-year increment (e.g. Nov) applies only to that month onward in its year, then the full year after." />
                 </div>
               ))}
               <p className="text-xs text-slate-400">
@@ -142,12 +157,18 @@ export function SavingsTab({
 
         <Section title="Personal savings & retirement phase">
           <div className="grid grid-cols-2 gap-3">
-            <NumberField label="Current personal savings" prefix="RM" value={savings.currentPersonalSavings} onChange={(v) => set('currentPersonalSavings', v)} step={1000} />
-            <NumberField label="Monthly personal saving" prefix="RM" value={savings.monthlyPersonalSaving} onChange={(v) => set('monthlyPersonalSaving', v)} step={100} />
-            <NumberField label="Personal return" suffix="%" value={savings.personalSavingsReturn} onChange={(v) => set('personalSavingsReturn', v)} step={0.1} />
-            <NumberField label="Annual transfer to EPF (cap)" prefix="RM" value={savings.annualTransferToEpf} onChange={(v) => set('annualTransferToEpf', v)} step={1000} />
-            <NumberField label="Inflation rate" suffix="%" value={savings.inflationRate} onChange={(v) => set('inflationRate', v)} step={0.1} />
-            <NumberField label="Stop transfer at age" value={savings.stopTransferAtAge} onChange={(v) => set('stopTransferAtAge', v)} />
+            <NumberField label="Current personal savings" prefix="RM" value={savings.currentPersonalSavings} onChange={(v) => set('currentPersonalSavings', v)} step={1000}
+              hint="Non-EPF savings and investments you hold today (cash, ASB, unit trusts, shares, etc.)." />
+            <NumberField label="Monthly personal saving" prefix="RM" value={savings.monthlyPersonalSaving} onChange={(v) => set('monthlyPersonalSaving', v)} step={100}
+              hint="Amount you add to personal savings each month while still working (stops at retirement)." />
+            <NumberField label="Personal return" suffix="%" value={savings.personalSavingsReturn} onChange={(v) => set('personalSavingsReturn', v)} step={0.1}
+              hint="Assumed annual return on personal savings, in percent. Usually lower than EPF — which is why these funds are spent down first in retirement." />
+            <NumberField label="Annual transfer to EPF (cap)" prefix="RM" value={savings.annualTransferToEpf} onChange={(v) => set('annualTransferToEpf', v)} step={1000}
+              hint="Each retirement year, up to this much is moved from personal savings into EPF to earn the higher dividend. Limited by the RM100k/year EPF self-contribution cap and by how much personal savings you actually hold." />
+            <NumberField label="Inflation rate" suffix="%" value={savings.inflationRate} onChange={(v) => set('inflationRate', v)} step={0.1}
+              hint="Annual rate, in percent, at which your living expenses grow during retirement." />
+            <NumberField label="Stop transfer at age" value={savings.stopTransferAtAge} onChange={(v) => set('stopTransferAtAge', v)}
+              hint="Age after which no more money is transferred from personal savings into EPF (e.g. 65)." />
           </div>
         </Section>
       </div>
